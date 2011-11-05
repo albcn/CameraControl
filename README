@@ -1,0 +1,18 @@
+CameraControl
+
+Description:
+	CameraControl aims to be a small tool to do a couple if things
+		      - Take pictures for a Time Lapse movie
+		      - Take multiple pictures for astrophotography
+
+Authors:
+	Alex Perera <aperera@gmail.com>
+
+License: 
+	 
+	 This python tool is distributed under the :
+	 
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3
+
+
