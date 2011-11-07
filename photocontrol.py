@@ -36,7 +36,7 @@ class MyFrame(wx.Frame):
         self.static_line_1 = wx.StaticLine(self, -1)
         self.static_line_2 = wx.StaticLine(self, -1)
         self.but_startCapture = wx.Button(self, -1, "Start Capture")
-        self.bitmap_2 = wx.StaticBitmap(self, -1, wx.Bitmap("/home/alex/src/CameraControl/back.jpg", wx.BITMAP_TYPE_ANY))
+        self.bitmap_2 = wx.StaticBitmap(self, -1, wx.Bitmap("back.jpg", wx.BITMAP_TYPE_ANY))
         self.text_ctrl_1 = wx.TextCtrl(self, -1, "", style=wx.TE_MULTILINE|wx.TE_READONLY)
 
         self.__set_properties()
