@@ -5,6 +5,22 @@
 import wx
 
 import photocontrolnx
+import logging
+import wx.lib.newevent
+import sys
+
+logger = logging.getLogger(__name__)
+
+class WxTextCtrlHandler(logging.Handler):
+    def __init__(self, ctrl):
+        logging.Handler.__init__(self)
+        self.ctrl = ctrl
+
+    def emit(self, record):
+        s = self.format(record) + '\n'
+        wx.CallAfter(self.ctrl.WriteText, s)
+
+
 
 # begin wxGlade: extracode
 # end wxGlade
@@ -37,7 +53,7 @@ class MyFrame(wx.Frame):
         self.static_line_2 = wx.StaticLine(self, -1)
         self.but_startCapture = wx.Button(self, -1, "Start Capture")
         self.bitmap_2 = wx.StaticBitmap(self, -1, wx.Bitmap("back.jpg", wx.BITMAP_TYPE_ANY))
-        self.text_ctrl_1 = wx.TextCtrl(self, -1, "", style=wx.TE_MULTILINE|wx.TE_READONLY)
+        self.text_ctrl_1 = wx.TextCtrl(self, -1, size=(300,100), style=wx.TE_MULTILINE|wx.TE_READONLY)
 
         self.__set_properties()
         self.__do_layout()
@@ -55,7 +71,12 @@ class MyFrame(wx.Frame):
         # end wxGlade
         self.camera = None
         self.capture = None
-
+        handler = WxTextCtrlHandler(self.text_ctrl_1)
+        logger.addHandler(handler)
+        FORMAT = "%(asctime)s %(levelname)s %(message)s"
+        handler.setFormatter(logging.Formatter(FORMAT))
+        logger.setLevel(logging.DEBUG)
+        
     def __set_properties(self):
         # begin wxGlade: MyFrame.__set_properties
         self.SetTitle("GuiController")
@@ -93,7 +114,7 @@ class MyFrame(wx.Frame):
         sizer_3.Add(grid_sizer_1, 1, wx.EXPAND, 0)
         sizer_3.Add(self.bitmap_2, 0, wx.EXPAND, 0)
         sizer_2.Add(sizer_3, 1, wx.EXPAND, 0)
-        sizer_2.Add(self.text_ctrl_1, 0, wx.EXPAND, 0)
+        sizer_2.Add(self.text_ctrl_1, 0, wx.ALL|wx.EXPAND, 0)
         self.SetSizer(sizer_2)
         sizer_2.Fit(self)
         self.Layout()
@@ -153,22 +174,26 @@ class MyFrame(wx.Frame):
 
     def guiStartCapture(self, event): # wxGlade: MyFrame.<event_handler>
         print "Starting Capture"
+        logger.log(logging.INFO, "Starting Capture")
         self.capture.exeCapture()
         event.Skip()
 
     def guiPictureStyle(self, event): # wxGlade: MyFrame.<event_handler>
+        logger.log(logging.INFO, "Changing Capture Style")
         self.capture.setPictureStyle(self.combo_pictureStyle.GetValue())
         #print self.capture.getPictureStyle()
+
         event.Skip()
 
     def guiHDR(self, event): # wxGlade: MyFrame.<event_handler>
         self.capture.setHDR(self.combo_hdr.GetValue())
-        print self.capture.getHDR()
+        logger.log(logging.INFO,"Compensation of exposition set to "+self.capture.getHDR())
         event.Skip()  
 # end of class MyFrame
 
-
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+    
     app = wx.PySimpleApp(0)
     wx.InitAllImageHandlers()
     GuiController = MyFrame(None, -1, "")

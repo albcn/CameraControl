@@ -1,14 +1,16 @@
 
 import subprocess
 import time
+import logging
 from os import remove
 
+logger = logging.getLogger(__name__)
+
+
 class GphotoCmdInt():
-    lastcmd = ''
-    lastout = []
-    maincall =''
-    commands = []
     def __init__(self):
+        self.lastcmd=''
+        self.lastout = []
         self.maincall = 'gphoto2'
         self.commands =  {  'summary' : '--summary',
                             'getConfigs': '--list-config',
@@ -86,12 +88,16 @@ class Camera():
     interface = GphotoCmdInt()
     def __init__(self):
         # Trovar model de camara
+        logger.log(logging.INFO, "Connecting to Camara")
         self.model = self.interface.getModel()
+        logger.log(logging.INFO, "Hello "+self.model+" !")
         #   Trovar els posibiliats de la camara
         self.configs = self.interface.getConfigs()
         #   Trovar el rang possible de compensacions
         self.compensations = self.interface.getChoices('exposurecompensation').values()
     def readCompensation(self):
+        logger.log(logging.INFO, "Reading Compensation Values")
+        logging.info("hello")
         self.compensation = self.interface.getValue('exposurecompensation')
         return self.compensation
     def getCurrentPictureStyle(self):
@@ -177,8 +183,13 @@ class Capture( ):
 
 
     
-#n = Camera()
-#c = Capture(n)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+    logging.info("Starting No GUI controller")
+    n = Camera()
+    c = Capture(n)
 #c.setCapture(1, 2, "test", "0")
 
 #c.exeCapture()
