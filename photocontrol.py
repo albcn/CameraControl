@@ -190,7 +190,8 @@ class MyFrame(wx.Frame):
 
     def guiStartCapture(self, event): # wxGlade: MyFrame.<event_handler>
         self.logr.log(logging.INFO, "Starting Capture")
-        self.capture.exeCapture()
+        #self.capture.exeCapture()
+        self.capture.start()
         event.Skip()
 
     def guiPictureStyle(self, event): # wxGlade: MyFrame.<event_handler>

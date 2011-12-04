@@ -192,7 +192,7 @@ class Capture(threading.Thread):
             time.sleep(act[2])
 
     def run(self):
-        self.exeCapture(self)
+        self.exeCapture()
     
 
 
