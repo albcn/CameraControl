@@ -2,9 +2,10 @@
 import subprocess
 import time
 import logging
+import threading
 from os import remove
 
-logger = logging.getLogger(__name__)
+
 
 
 class GphotoCmdInt():
@@ -80,23 +81,20 @@ class GphotoCmdInt():
         return  out
 
 class Camera():
-    lastcmd = ''
-    model = ''
-    configs = []
-    compensations = ["0.3","0.6", "1.0","1.3", "1.6","2"]
-    compensation = '0'
-    interface = GphotoCmdInt()
     def __init__(self):
+        self.interface = GphotoCmdInt()
+        self.lastcmd = ''
         # Trovar model de camara
-        logger.log(logging.INFO, "Connecting to Camara")
+        logging.info( "Connecting to Camara")
         self.model = self.interface.getModel()
-        logger.log(logging.INFO, "Hello "+self.model+" !")
+        logging.info( "Hello "+self.model+" !")
         #   Trovar els posibiliats de la camara
         self.configs = self.interface.getConfigs()
         #   Trovar el rang possible de compensacions
         self.compensations = self.interface.getChoices('exposurecompensation').values()
+        self.compensation = self.readCompensation()
     def readCompensation(self):
-        logger.log(logging.INFO, "Reading Compensation Values")
+        logging.info( "Reading Compensation Values")
         logging.info("hello")
         self.compensation = self.interface.getValue('exposurecompensation')
         return self.compensation
@@ -106,19 +104,32 @@ class Camera():
         return self.interface.getChoices('picturestyle')      
     def setCurrentPictureStyle(self,picturestyle):
         return self.interface.setValue('picturestyle',picturestyle)           
-    def doCapture(self,exposurecompensation ='0',filename = None ):
+    def doCapture(self,exposurecompensation ='0',filename = '' ):
+        logging.info("Capturing at "+exposurecompensation+", storing at "+filename)
         self.interface.setValue('exposurecompensation',exposurecompensation)
-        if filename != None:
+        if filename != '':
             out = self.interface.captureFile(filename)
         else:
             out = self.interface.capture()
         return out
 
 
-class Capture( ):
+
+#class StartCapture(threading.Thread):
+#    def __init__(self,x):
+#        self.__x = x
+#        threading.Thread.__init__(self)
+#    def run (self):
+#          print str(self.__x)
+
+
+
+
+class Capture(threading.Thread):
     def __init__(self, Camera):
-        self.interval = 30
-        self.shots = 1000
+        threading.Thread.__init__(self)
+        self.interval = 3
+        self.shots = 2
         self.currentcam = Camera
         self.compensation = self.currentcam.readCompensation()
         self.hdrexpspan = set(self.currentcam.compensations)
@@ -177,11 +188,11 @@ class Capture( ):
                 capPlan.append( [filebase + ".cr2","0",self.interval] )   
             s = s+1
         for act in capPlan:
-            print(str(act))
             Camera.doCapture(self.currentcam,act[1],act[0])
             time.sleep(act[2])
 
-
+    def run(self):
+        self.exeCapture(self)
     
 
 

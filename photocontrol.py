@@ -9,22 +9,21 @@ import logging
 import wx.lib.newevent
 import sys
 
-logger = logging.getLogger(__name__)
 
-class WxTextCtrlHandler(logging.Handler):
+
+
+class WxLog(logging.Handler):
     def __init__(self, ctrl):
         logging.Handler.__init__(self)
         self.ctrl = ctrl
 
     def emit(self, record):
-        s = self.format(record) + '\n'
-        wx.CallAfter(self.ctrl.WriteText, s)
-
-
+        #s = self.format(record) + '\n'
+        #wx.CallAfter(self.ctrl.WriteText, s)
+        self.ctrl.AppendText(self.format(record)+"\n") 
 
 # begin wxGlade: extracode
 # end wxGlade
-
 
 
 class MyFrame(wx.Frame):
@@ -36,7 +35,7 @@ class MyFrame(wx.Frame):
         self.bt_initCam = wx.Button(self, -1, "Initialize Camera")
         self.labelNull = wx.StaticText(self, -1, "")
         self.lab_shots = wx.StaticText(self, -1, "Num. Shots", style=wx.ALIGN_RIGHT)
-        self.sc_setShots = wx.SpinCtrl(self, -1, "", min=0, max=100)
+        self.sc_setShots = wx.SpinCtrl(self, -1, "", min=0, max=10000)
         self.lab_interval = wx.StaticText(self, -1, "Interval (s)", style=wx.ALIGN_RIGHT)
         self.sc_setInterval = wx.SpinCtrl(self, -1, "", min=0, max=100)
         self.lab_filenamebase = wx.StaticText(self, -1, "File Name Base")
@@ -71,18 +70,34 @@ class MyFrame(wx.Frame):
         # end wxGlade
         self.camera = None
         self.capture = None
-        handler = WxTextCtrlHandler(self.text_ctrl_1)
-        logger.addHandler(handler)
-        FORMAT = "%(asctime)s %(levelname)s %(message)s"
-        handler.setFormatter(logging.Formatter(FORMAT))
-        logger.setLevel(logging.DEBUG)
+        
+        self.stdoutRef = sys.stdout
+        self.logr = logging.getLogger('')
+        self.logr.setLevel(logging.DEBUG)
+        hdlr = WxLog(self.text_ctrl_1)
+        hdlr.setFormatter(logging.Formatter('%(levelname)s | %(name)s |%(message)s [@ %(asctime)s in %(filename)s:%(lineno)d]'))
+        self.logr.addHandler(hdlr)
+        self.logr.debug(str(sys.stdout)) 
+
+        #handler = WxTextCtrlHandler(self.text_ctrl_1)
+        #logger.addHandler(handler)
+        #h = logging.StreamHandler()
+        #f = logging.Formatter("%(levelname)s %(asctime)s %(funcName)s %(lineno)d %(message)s")
+        #FORMAT = "%(asctime)s %(levelname)s %(message)s"
+        #handler.setFormatter(logging.Formatter(FORMAT))
+        #logger.addHandler(h)
+        #logger.setLevel(logging.DEBUG)
+        
+        
+    
+  
         
     def __set_properties(self):
         # begin wxGlade: MyFrame.__set_properties
         self.SetTitle("GuiController")
         self.GuiController_statusbar.SetStatusWidths([-1, 100, 50, 50])
         # statusbar fields
-        GuiController_statusbar_fields = ["Camera", "Status", "Series", "Current"]
+        GuiController_statusbar_fields = ["Camera"  , "Status", "Series", "Current"]
         for i in range(len(GuiController_statusbar_fields)):
             self.GuiController_statusbar.SetStatusText(GuiController_statusbar_fields[i], i)
         # end wxGlade
@@ -172,14 +187,14 @@ class MyFrame(wx.Frame):
         print "Event handler `guiTogglePreviewCaptures' not implemented!"
         event.Skip()
 
+
     def guiStartCapture(self, event): # wxGlade: MyFrame.<event_handler>
-        print "Starting Capture"
-        logger.log(logging.INFO, "Starting Capture")
+        self.logr.log(logging.INFO, "Starting Capture")
         self.capture.exeCapture()
         event.Skip()
 
     def guiPictureStyle(self, event): # wxGlade: MyFrame.<event_handler>
-        logger.log(logging.INFO, "Changing Capture Style")
+        #logger.log(logging.INFO, "Changing Capture Style")
         self.capture.setPictureStyle(self.combo_pictureStyle.GetValue())
         #print self.capture.getPictureStyle()
 
@@ -187,16 +202,15 @@ class MyFrame(wx.Frame):
 
     def guiHDR(self, event): # wxGlade: MyFrame.<event_handler>
         self.capture.setHDR(self.combo_hdr.GetValue())
-        logger.log(logging.INFO,"Compensation of exposition set to "+self.capture.getHDR())
+        self.logr.log(logging.INFO,"Compensation of exposition set to "+self.capture.getHDR())
         event.Skip()  
 # end of class MyFrame
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    
     app = wx.PySimpleApp(0)
     wx.InitAllImageHandlers()
     GuiController = MyFrame(None, -1, "")
     app.SetTopWindow(GuiController)
     GuiController.Show()
     app.MainLoop()
+    sys.stdout = self.stdoutRef
