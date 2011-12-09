@@ -85,9 +85,9 @@ class Camera():
         self.interface = GphotoCmdInt()
         self.lastcmd = ''
         # Trovar model de camara
-        logging.info( "Connecting to Camara")
+        logging.info( "Connecting to Camera")
         self.model = self.interface.getModel()
-        logging.info( "Hello "+self.model+" !")
+        logging.info( self.model+" !")
         #   Trovar els posibiliats de la camara
         self.configs = self.interface.getConfigs()
         #   Trovar el rang possible de compensacions
@@ -95,7 +95,7 @@ class Camera():
         self.compensation = self.readCompensation()
     def readCompensation(self):
         logging.info( "Reading Compensation Values")
-        logging.info("hello")
+        # logging.info("hello")
         self.compensation = self.interface.getValue('exposurecompensation')
         return self.compensation
     def getCurrentPictureStyle(self):
