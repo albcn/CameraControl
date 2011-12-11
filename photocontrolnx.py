@@ -59,7 +59,10 @@ class GphotoCmdInt():
         for line in out:
             if "Current:" in line:
                 value=(line.split()[1:])
-        return  value[0]
+        if len(value)==0:
+            return "0"
+        else:
+            return  value[0]
     def setValue(self, config, value):
         self.lastcmd = [ self.maincall, 
                     self.commands['setVal'],
